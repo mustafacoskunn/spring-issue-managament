@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User,Long> { //bir çok sorogu yapabiliyoruz//sayfalama yapabilirruz
 
-    
+    User findByUsername(String username);
 }
