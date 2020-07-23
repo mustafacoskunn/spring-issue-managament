@@ -23,18 +23,26 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project save(Project project) {
-        if (project.getProjectCode() == null) {
-            throw new IllegalArgumentException("Project code cannot be null!");
+    public ProjectDto save(ProjectDto projectDto) {
+
+        Project projectCheck = projectRepository.getByProjectCode(projectDto.getProjectCode());
+
+        if (projectCheck != null) {
+            throw new IllegalArgumentException("Project Code Already Exist");
         }
-        return projectRepository.save(project);
+
+        Project p = modelMapper.map(projectDto, Project.class);
+        p = projectRepository.save(p);
+        projectDto.setId(p.getId());
+
+        return projectDto;
     }
 
     @Override
     public ProjectDto getById(Long id) {
-        Project p=projectRepository.getOne(id);
+        Project p = projectRepository.getOne(id);
 
-        return  modelMapper.map(p,ProjectDto.class);
+        return modelMapper.map(p, ProjectDto.class);
     }
 
     @Override
@@ -55,5 +63,30 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Boolean delete(Project project) {
         return null;
+    }
+
+    public Boolean delete(Long id) {
+        projectRepository.deleteById(id);
+        return true;
+    }
+
+    @Override
+    public ProjectDto update(Long id, ProjectDto projectDto) {
+        Project projectDb = projectRepository.getOne(id);
+        if (projectDb == null) {
+            throw new IllegalArgumentException("Project Does Not Exist ID:" + id);
+        }
+
+        Project projectCheck = projectRepository.getByProjectCodeAndIdNot(projectDto.getProjectCode(),id);
+
+        if (projectCheck != null ) {
+            throw new IllegalArgumentException("Project Code Already Exist");
+        }
+
+        projectDb.setProjectCode(projectDto.getProjectCode());
+        projectDb.setProjectName(projectDto.getProjectName());
+        projectRepository.save(projectDb);
+
+        return modelMapper.map(projectDb, ProjectDto.class);
     }
 }
